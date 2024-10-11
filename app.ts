@@ -2,11 +2,11 @@
 //npm i express dotenv morgan --s
 //npm i nodemon -g
 const express = require('express');
-require('dotenv').config();
+const db = require('./util/database.ts');
 const morgan = require('morgan');
 const cors = require('cors');
 
-const port = process.env.PORT || 3333;
+const port: number = 3333;
 
 const app = express();
 //미들웨어 설정
