@@ -1,13 +1,12 @@
 import type { Request, Response } from 'express';
 const express = require('express');
-const db = require('./util/database.ts');
 const morgan = require('morgan');
 const cors = require('cors');
 const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerConfig = require('./swagger/config');
 const port: number = 3333;
-
+const main = require('./router/main');
 const app = express();
 
 // 미들웨어 설정
@@ -19,6 +18,7 @@ app.use(cors());
 // Swagger 스펙 정의
 const swaggerDocs = swaggerJsDoc(swaggerConfig);
 
+app.use('/', main);
 // Swagger UI 설정
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
