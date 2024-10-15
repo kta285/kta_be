@@ -1,19 +1,17 @@
-// Swagger 옵션 설정
 const swaggerOptions = {
   swaggerDefinition: {
-    openapi: '3.0.0', // OpenAPI 버전
+    openapi: '3.0.0',
     info: {
-      title: 'API Documentation', // 문서 제목
-      version: '1.0.0', // 버전
-      description: 'API 문서', // 설명
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'API 문서',
     },
     servers: [
       {
-        url: 'http://localhost:3333', // 서버 URL
+        url: 'http://localhost:3333',
       },
     ],
   },
-  apis: ['./*.ts'], // 주석이 포함된 API 파일 경로
+  apis: ['./router/*.ts'], // 이 경로가 정확한지 확인 (TypeScript 사용 시는 .ts로)
 };
-
 module.exports = swaggerOptions;
