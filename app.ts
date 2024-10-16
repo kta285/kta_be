@@ -8,6 +8,7 @@ const swaggerConfig = require('./swagger/config');
 const port: number = 3333;
 const main = require('./router/main');
 const project = require('./router/project');
+const signup = require('./router/signup');
 const app = express();
 
 // 미들웨어 설정
@@ -21,6 +22,7 @@ const swaggerDocs = swaggerJsDoc(swaggerConfig);
 
 app.use('/', main);
 app.use('/project', project);
+app.use('/user', signup);
 
 // Swagger UI 설정
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
