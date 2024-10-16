@@ -9,3 +9,35 @@ exports.getProjects = async (req: Request, res: Response) => {
     return res.status(500).json({ error: '문제가 발생했습니다' });
   }
 };
+
+exports.postProjects = async (req: Request, res: Response) => {
+  let { title, amount, category, content, startDate, endDate } = req.body.body;
+  if (!(startDate instanceof Date && endDate instanceof Date)) {
+    startDate = new Date(startDate);
+    endDate = new Date(endDate);
+  }
+  try {
+    const startDateFomat = startDate.toISOString().split('T')[0];
+    const endDateFomat = endDate.toISOString().split('T')[0];
+    await db.execute(
+      'INSERT INTO starfunding.Projects (title, description, goal_amount,start_date,end_date,type,status) VALUES (?,?,?,?,?,?,?)',
+      [
+        title,
+        content,
+        Number(amount),
+        startDateFomat,
+        endDateFomat,
+        category,
+        'pending',
+      ],
+    );
+    await db.query('COMMIT');
+    return res
+      .status(200)
+      .json({ message: '프로젝트가 성공적으로 작성되었습니다.' });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({ error: '문제가 발생했습니다' });
+  }
+};
