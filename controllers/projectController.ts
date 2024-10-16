@@ -41,3 +41,14 @@ exports.postProjects = async (req: Request, res: Response) => {
     return res.status(500).json({ error: '문제가 발생했습니다' });
   }
 };
+
+exports.getProjectDetail = async (req: Request, res: Response) => {
+  const projectId = req.params.id;
+  const sql = `SELECT * FROM Projects WHERE project_id = ?`;
+  try {
+    const projectsDetail = await db.query(sql, [projectId]);
+    return res.status(200).json(projectsDetail[0]);
+  } catch (error) {
+    return res.status(500).json({ error: '문제가 발생했습니다' });
+  }
+};
