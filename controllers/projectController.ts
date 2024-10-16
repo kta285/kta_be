@@ -11,7 +11,8 @@ exports.getProjects = async (req: Request, res: Response) => {
 };
 
 exports.postProjects = async (req: Request, res: Response) => {
-  let { title, amount, category, content, startDate, endDate } = req.body.body;
+  let { title, titleImg, amount, category, content, startDate, endDate } =
+    req.body.body;
   if (!(startDate instanceof Date && endDate instanceof Date)) {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
@@ -20,9 +21,10 @@ exports.postProjects = async (req: Request, res: Response) => {
     const startDateFomat = startDate.toISOString().split('T')[0];
     const endDateFomat = endDate.toISOString().split('T')[0];
     await db.execute(
-      'INSERT INTO starfunding.Projects (title, description, goal_amount,start_date,end_date,type,status) VALUES (?,?,?,?,?,?,?)',
+      'INSERT INTO starfunding.Projects (title,title_img, description, goal_amount,start_date,end_date,type,status) VALUES (?,?,?,?,?,?,?,?)',
       [
         title,
+        titleImg,
         content,
         Number(amount),
         startDateFomat,
