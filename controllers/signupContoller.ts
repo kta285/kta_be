@@ -1,5 +1,4 @@
 const pool = require('../util/database');
-
 import type { Request, Response } from 'express';
 
 exports.signup = async (req: Request, res: Response) => {
@@ -27,6 +26,7 @@ exports.signup = async (req: Request, res: Response) => {
     await pool.query(query, [username, email, password, user_type]);
     res.status(201).json({ message: '회원가입 성공!' });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: '문제가 발생했습니다.' });
   }
 };
