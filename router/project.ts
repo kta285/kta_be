@@ -53,7 +53,26 @@ router.get('/all', projectController.getProjects); // 전체 이미지 목록 �
  *         description: 잘못된 요청
  */
 router.post('/write', projectController.postProjects); // 작성
-
+/**
+ * @swagger
+ * /project/{id}:
+ *   get:
+ *     summary: 게시글 디테일
+ *     description: 해당 id에 맞는 게시글 데이터가 반환됨.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: 게시글의 ID
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: 성공적인 응답
+ *       404:
+ *         description: 게시글을 찾을 수 없음
+ */
+router.get('/:id', projectController.getProjectDetail); // 게시글 디테일 가져오기
 module.exports = router;
 
 module.exports = router;
