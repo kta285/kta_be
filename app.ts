@@ -7,8 +7,9 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerConfig = require('./swagger/config');
 const port: number = 3333;
 const main = require('./router/main');
-const project = require('./router/project')
+const project = require('./router/project');
 const write = require('./router/write');
+const signup = require('./router/signup');
 const app = express();
 
 // 미들웨어 설정
@@ -21,8 +22,9 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 const swaggerDocs = swaggerJsDoc(swaggerConfig);
 
 app.use('/', main);
-app.use('/project', project)
+app.use('/project', project);
 app.use('/write', write);
+app.use('/user', signup);
 
 // Swagger UI 설정
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
