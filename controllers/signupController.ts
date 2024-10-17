@@ -2,7 +2,7 @@ const pool = require('../util/database');
 import type { Request, Response } from 'express';
 
 exports.signup = async (req: Request, res: Response) => {
-  const { username, email, password, user_type } = req.body;
+  const { username, email, password } = req.body;
 
   if (!email.includes('@')) {
     return res
@@ -22,8 +22,8 @@ exports.signup = async (req: Request, res: Response) => {
       return res.status(409).json({ error: '이미 등록된 이메일입니다.' });
     }
 
-    const query = `insert into Users (username, email, password, user_type) values (?,?,?,?)`;
-    await pool.query(query, [username, email, password, user_type]);
+    const query = `insert into Users (username, email, password) values (?,?,?)`;
+    await pool.query(query, [username, email, password]);
     res.status(201).json({ message: '회원가입 성공!' });
   } catch (error) {
     console.error(error);
