@@ -1,5 +1,6 @@
 const db = require('../util/database');
 import type { Request, Response } from 'express';
+
 exports.getProjects = async (req: Request, res: Response) => {
   const sql = `select * from Projects order by project_id`;
   try {
