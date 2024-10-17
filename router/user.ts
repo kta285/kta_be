@@ -41,7 +41,8 @@ const router = express.Router();
  *         description: 이메일 중복
  *       500:
  *         description: 서버 오류
- */
+*/
+router.post('/signup', signupController.signup);
 
 /**
  * @swagger
@@ -98,8 +99,7 @@ const router = express.Router();
  *                   type: string
  *                   example: 로그인 실패
  */
-
-router.post('/signup', signupController.signup);
 router.post('/login', loginController.login);
+
 
 module.exports = router;

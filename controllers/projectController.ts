@@ -55,3 +55,30 @@ exports.getProjectDetail = async (req: Request, res: Response) => {
     return res.status(500).json({ error: '문제가 발생했습니다' });
   }
 };
+
+exports.modifyProjectStatus = async (req: Request, res: Response) => {
+  const projectId = req.params.id;
+  const projectStatus = req.params.status;
+
+  if (!["pending", "ongoing", "completed", "failed"].includes(projectStatus)) {
+    return res.status(500).json({ error: '잘못된 상태 변경 요청입니다.' });
+  }
+
+  let sql = `SELECT * FROM Projects WHERE project_id = ?`;
+  try {
+    const [selectedProject] = await db.query(sql, [projectId]);  // query 결과 구조 분해 할당
+    if (selectedProject.length > 0) {
+      sql = `UPDATE Projects SET status = ? WHERE project_id = ?`; // id 대신 project_id로 수정
+      try {
+        await db.query(sql, [projectStatus, projectId]);
+        return res.status(200).json({ message: `프로젝트 상태가 "${projectId}"으로 변경되었습니다.` });
+      } catch (error) {
+        return res.status(400).json({ error: '잘못된 상태 변경 요청입니다.' });
+      }
+    } else {
+      return res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: '데이터베이스 요청 중 문제가 발생했습니다.' });
+  }
+};

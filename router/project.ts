@@ -110,6 +110,68 @@ router.post('/write', projectController.postProjects); // 작성
  *         description: 게시글을 찾을 수 없음
  */
 router.get('/:id', projectController.getProjectDetail); // 게시글 디테일 가져오기
-module.exports = router;
 
+/**
+ * @swagger
+ * /project/{id}/{status}:
+ *   put:
+ *     summary: 프로젝트 상태 변경
+ *     description: 주어진 ID에 해당하는 프로젝트의 상태를 변경합니다.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: 프로젝트의 ID
+ *         schema:
+ *           type: integer
+ *       - name: status
+ *         in: path
+ *         required: true
+ *         description: 변경할 프로젝트 상태 (pending, ongoing, completed, failed 중 하나)
+ *         schema:
+ *           type: string
+ *           enum: [pending, ongoing, completed, failed]
+ *     responses:
+ *       200:
+ *         description: 프로젝트 상태가 성공적으로 변경됨
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "프로젝트 상태가 성공적으로 변경되었습니다."
+ *       400:
+ *         description: 잘못된 상태 값
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "잘못된 상태 변경 요청입니다."
+ *       404:
+ *         description: 프로젝트를 찾을 수 없음
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "프로젝트를 찾을 수 없습니다."
+ *       500:
+ *         description: 서버 내부 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "프로젝트 상태 업데이트 중 문제가 발생했습니다."
+ */
+router.put('/:id/:status', projectController.modifyProjectStatus);
 module.exports = router;
