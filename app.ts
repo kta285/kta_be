@@ -10,6 +10,7 @@ const main = require('./router/main');
 const project = require('./router/project');
 const signup = require('./router/signup');
 const app = express();
+const inquiries = require('./router/inquiries')
 
 // 미들웨어 설정
 app.use(morgan('dev'));
@@ -23,6 +24,7 @@ const swaggerDocs = swaggerJsDoc(swaggerConfig);
 app.use('/', main);
 app.use('/project', project);
 app.use('/user', signup);
+app.use('/inquiries', inquiries);
 
 // Swagger UI 설정
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
