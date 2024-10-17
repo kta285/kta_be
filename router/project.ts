@@ -111,5 +111,3 @@ router.post('/write', projectController.postProjects); // 작성
  */
 router.get('/:id', projectController.getProjectDetail); // 게시글 디테일 가져오기
 module.exports = router;
-
-module.exports = router;
