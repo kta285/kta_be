@@ -8,7 +8,8 @@ const swaggerConfig = require('./swagger/config');
 const port: number = 3333;
 const main = require('./router/main');
 const project = require('./router/project');
-const signup = require('./router/signup');
+const user = require('./router/user');
+const admin = require('./router/admin');
 const app = express();
 const inquiries = require('./router/inquiries')
 
@@ -23,7 +24,8 @@ const swaggerDocs = swaggerJsDoc(swaggerConfig);
 
 app.use('/', main);
 app.use('/project', project);
-app.use('/user', signup);
+app.use('/user', user);
+app.use('/admin', admin);
 app.use('/inquiries', inquiries);
 
 // Swagger UI 설정
