@@ -22,3 +22,16 @@ export const submitInquiry = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ message: '서버 오류가 발생했습니다.' });
   }
 };
+
+// 문의 목록 불러오는 함수
+export const getInquiries = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const query = 'SELECT * FROM Inquiry';
+    const inquiries = await db.execute(query, []);
+
+    res.status(201).json(inquiries[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+  }
+};
