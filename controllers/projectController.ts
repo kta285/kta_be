@@ -11,6 +11,27 @@ exports.getProjects = async (req: Request, res: Response) => {
   }
 };
 
+exports.getProjectsByUser = async (req: Request, res: Response) => {
+  const userId = req.headers["user_id"];
+
+  const query = `SELECT * FROM Projects where created_by = ?`;
+  if (userId) {
+    try {
+      const [results] = await db.query(query, [userId]);
+      // 사용자 검증
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'DB: 사용자 정보 없음' });
+      }
+      // 로그인 성공
+      const projects = results;
+      res.status(200).json(projects);
+    } catch (error) {
+      console.log(userId)
+      res.status(500).json({ message: 'DB: 처리 오류' });
+    }
+  } else res.status(401).json({ message: 'header.user_id 없음' });
+};
+
 exports.postProjects = async (req: Request, res: Response) => {
   let { title, titleImg, amount, category, content, startDate, endDate } =
     req.body.body;
