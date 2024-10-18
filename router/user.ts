@@ -11,6 +11,8 @@ const router = express.Router();
  *   post:
  *     summary: 사용자 회원가입
  *     description: 새로운 사용자를 데이터베이스에 등록합니다.
+ *     tags:
+ *       - Users
  *     requestBody:
  *       required: true
  *       content:
@@ -51,6 +53,8 @@ router.post('/signup', signupController.signup);
  *   post:
  *     summary: 사용자 로그인
  *     description: 사용자가 이메일과 비밀번호로 로그인합니다.
+ *     tags:
+ *       - Users
  *     requestBody:
  *       required: true
  *       content:
@@ -108,6 +112,8 @@ router.post('/login', loginController.login);
  *   get:
  *     summary: 사용자 정보 조회
  *     description: 사용자 ID를 헤더에 포함하여 요청하면 해당 사용자의 정보를 반환합니다.
+ *     tags:
+ *       - Users
  *     parameters:
  *       - in: header
  *         name: user_id
@@ -155,4 +161,92 @@ router.post('/login', loginController.login);
  */
 router.get('/info', userController.getUser)
 
+/**
+ * @swagger
+ * /user/modify:
+ *   post:
+ *     summary: 사용자 정보 수정
+ *     description: 사용자가 자신의 정보를 수정할 수 있습니다. username과 currentPassword는 필수 항목이며, password는 선택 항목입니다.
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - username
+ *               - currentPassword
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: 사용자의 고유 ID
+ *                 example: "1234"
+ *               username:
+ *                 type: string
+ *                 description: 변경할 사용자 이름
+ *                 example: "new_username"
+ *               currentPassword:
+ *                 type: string
+ *                 description: 현재 비밀번호
+ *                 example: "current_password123"
+ *               password:
+ *                 type: string
+ *                 description: 새 비밀번호 (선택 사항)
+ *                 example: "new_password123"
+ *     responses:
+ *       200:
+ *         description: 사용자 정보가 성공적으로 변경되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "사용자 정보가 성공적으로 변경되었습니다."
+ *       400:
+ *         description: 요청 본문에 필수 필드가 누락되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "username과 currentPassword는 필수 항목입니다."
+ *       401:
+ *         description: 기존 비밀번호가 일치하지 않습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "기존 비밀번호가 일치하지 않습니다."
+ *       404:
+ *         description: 사용자가 존재하지 않거나 업데이트가 실패했습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "사용자를 찾을 수 없습니다."
+ *       500:
+ *         description: 데이터베이스 처리 중 오류가 발생했습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "DB 처리 오류가 발생했습니다."
+ */
+router.post('/modify', userController.modifyUserInfo)
 module.exports = router;

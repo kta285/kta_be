@@ -20,17 +20,20 @@ exports.getProjectsByUser = async (req: Request, res: Response) => {
       const [results] = await db.query(query, [userId]);
       // 사용자 검증
       if (results.length === 0) {
-        return res.status(404).json({ error: 'DB: 사용자 정보 없음' });
+        return res.status(404).json({ message: 'DB: 사용자 id로 조회된 항목 없음' });
       }
-      // 로그인 성공
+      // 프로젝트 정보 반환
       const projects = results;
       res.status(200).json(projects);
     } catch (error) {
-      console.log(userId)
+      console.log('DB Error:', error); // 디버깅용 에러 출력
       res.status(500).json({ message: 'DB: 처리 오류' });
     }
-  } else res.status(401).json({ message: 'header.user_id 없음' });
+  } else {
+    res.status(401).json({ message: 'header.user_id 없음' });
+  }
 };
+
 
 exports.postProjects = async (req: Request, res: Response) => {
   let { title, titleImg, amount, category, content, startDate, endDate } =
@@ -153,6 +156,7 @@ exports.putProjectModify = async (req: Request, res: Response) => {
     return res.status(500).json({ error: '수정 중 문제가 발생했습니다' });
   }
 };
+
 exports.deleteProject = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
