@@ -4,8 +4,7 @@ import bcrypt from 'bcryptjs';
 
 exports.getUser = async (req: Request, res: Response) => {
   const userId = req.headers['user_id'];
-  const query = `SELECT * FROM Users WHERE user_id = ?`;
-
+  const query = `SELECT * FROM Users where user_id = ?`;
   if (userId) {
     try {
       const [results]: any = await pool.query(query, [userId]);
@@ -17,6 +16,7 @@ exports.getUser = async (req: Request, res: Response) => {
 
       // 로그인 성공
       const userInfo = results[0];
+
       res.status(200).json(userInfo);
     } catch (error) {
       res.status(500).json({ message: 'DB: 처리 오류' });
@@ -33,6 +33,7 @@ exports.modifyUserInfo = async (req: Request, res: Response) => {
     return res.status(400).json({
       message: 'username과 currentPassword는 필수 항목입니다.',
     });
+
   }
 
   try {
@@ -81,9 +82,9 @@ exports.modifyUserInfo = async (req: Request, res: Response) => {
     }
 
     // 4. 성공적으로 업데이트한 경우 응답
-    res.status(200).json({
-      message: '사용자 정보가 성공적으로 변경되었습니다.',
-    });
+    res
+      .status(200)
+      .json({ message: '사용자 정보가 성공적으로 변경되었습니다.' });
   } catch (error) {
     console.error('DB 처리 오류:', error);
     res.status(500).json({ message: 'DB 처리 오류가 발생했습니다' });

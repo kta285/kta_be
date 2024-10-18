@@ -12,7 +12,7 @@ exports.getProjects = async (req: Request, res: Response) => {
 };
 
 exports.getProjectsByUser = async (req: Request, res: Response) => {
-  const userId = req.headers["user_id"];
+  const userId = req.headers['user_id'];
 
   const query = `SELECT * FROM Projects where created_by = ?`;
   if (userId) {
@@ -20,7 +20,9 @@ exports.getProjectsByUser = async (req: Request, res: Response) => {
       const [results] = await db.query(query, [userId]);
       // 사용자 검증
       if (results.length === 0) {
-        return res.status(404).json({ message: 'DB: 사용자 id로 조회된 항목 없음' });
+        return res
+          .status(404)
+          .json({ message: 'DB: 사용자 id로 조회된 항목 없음' });
       }
       // 프로젝트 정보 반환
       const projects = results;
@@ -34,10 +36,18 @@ exports.getProjectsByUser = async (req: Request, res: Response) => {
   }
 };
 
-
 exports.postProjects = async (req: Request, res: Response) => {
-  let { title, titleImg, amount, category, content, startDate, endDate } =
-    req.body.body;
+  let {
+    title,
+    titleImg,
+    amount,
+    category,
+    content,
+    startDate,
+    endDate,
+    createdId,
+  } = req.body.body;
+
   if (!(startDate instanceof Date && endDate instanceof Date)) {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
@@ -46,7 +56,7 @@ exports.postProjects = async (req: Request, res: Response) => {
     const startDateFomat = startDate.toISOString().split('T')[0];
     const endDateFomat = endDate.toISOString().split('T')[0];
     await db.execute(
-      'INSERT INTO starfunding.Projects (title,title_img, description, goal_amount,start_date,end_date,type,status) VALUES (?,?,?,?,?,?,?,?)',
+      'INSERT INTO starfunding.Projects (title,title_img, description, goal_amount,start_date,end_date,type,status,created_by) VALUES (?,?,?,?,?,?,?,?,?)',
       [
         title,
         titleImg,
@@ -56,6 +66,7 @@ exports.postProjects = async (req: Request, res: Response) => {
         endDateFomat,
         category,
         'pending',
+        createdId,
       ],
     );
     await db.query('COMMIT');
@@ -74,6 +85,7 @@ exports.getProjectDetail = async (req: Request, res: Response) => {
   const sql = `SELECT * FROM Projects WHERE project_id = ?`;
   try {
     const projectsDetail = await db.query(sql, [projectId]);
+
     return res.status(200).json(projectsDetail[0]);
   } catch (error) {
     return res.status(500).json({ error: '문제가 발생했습니다' });
@@ -112,8 +124,22 @@ exports.modifyProjectStatus = async (req: Request, res: Response) => {
 };
 
 exports.putProjectModify = async (req: Request, res: Response) => {
-  let { title, titleImg, amount, category, content, startDate, endDate, id } =
-    req.body.body;
+  const userId = req.headers.authorization;
+  let {
+    title,
+    titleImg,
+    amount,
+    category,
+    content,
+    startDate,
+    endDate,
+    id,
+    created_by,
+  } = req.body.body;
+
+  if (created_by.toString() !== userId) {
+    return res.status(401).json({ error: '수정 권한이 없습니다' });
+  }
 
   if (!(startDate instanceof Date && endDate instanceof Date)) {
     startDate = new Date(startDate);
@@ -159,6 +185,8 @@ exports.putProjectModify = async (req: Request, res: Response) => {
 
 exports.deleteProject = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = req.headers.authorization;
+
   try {
     const [existingProject] = await db.execute(
       'SELECT * FROM starfunding.Projects WHERE project_id = ?',
@@ -167,6 +195,9 @@ exports.deleteProject = async (req: Request, res: Response) => {
 
     if (!existingProject.length) {
       return res.status(404).json({ message: '프로젝트를 찾을 수 없습니다.' });
+    }
+    if (existingProject[0].created_by.toString() !== userId) {
+      return res.status(401).json({ error: '삭제 권한이 없습니다' });
     }
 
     await db.execute('DELETE FROM starfunding.Projects WHERE project_id = ?', [
