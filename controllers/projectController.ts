@@ -197,7 +197,7 @@ exports.deleteProject = async (req: Request, res: Response) => {
       return res.status(404).json({ message: '프로젝트를 찾을 수 없습니다.' });
     }
     if (existingProject[0].created_by.toString() !== userId) {
-      return res.status(401).json({ error: '수정 권한이 없습니다' });
+      return res.status(401).json({ error: '삭제 권한이 없습니다' });
     }
 
     await db.execute('DELETE FROM starfunding.Projects WHERE project_id = ?', [
