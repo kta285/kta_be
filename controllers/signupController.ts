@@ -1,4 +1,5 @@
 const pool = require('../util/database');
+import bcrypt from 'bcryptjs';
 import type { Request, Response } from 'express';
 
 exports.signup = async (req: Request, res: Response) => {
@@ -21,9 +22,10 @@ exports.signup = async (req: Request, res: Response) => {
     if (checkResults.length > 0) {
       return res.status(409).json({ error: '이미 등록된 이메일입니다.' });
     }
-
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(hashedPassword, password);
     const query = `insert into Users (username, email, password) values (?,?,?)`;
-    await pool.query(query, [username, email, password]);
+    await pool.query(query, [username, email, hashedPassword]);
     res.status(201).json({ message: '회원가입 성공!' });
   } catch (error) {
     console.error(error);
