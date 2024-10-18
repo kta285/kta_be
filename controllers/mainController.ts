@@ -4,6 +4,8 @@ exports.getImges = async (req: Request, res: Response) => {
   const sql = `select * from image order by idx `;
   try {
     const imges = await db.query(sql);
+    console.log(imges[0], 'swiperImgs');
+
     return res.status(200).json(imges[0]);
   } catch (error) {
     return res.status(500).json({ error: '문제가 발생했습니다' });
