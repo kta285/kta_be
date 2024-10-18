@@ -86,6 +86,6 @@ exports.modifyUserInfo = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('DB 처리 오류:', error);
-    res.status(500).json({ message: 'DB 처리 오류가 발생했습니다.' });
+    res.status(500).json({ message: 'DB 처리 오류가 발생했습니다' });
   }
 };
