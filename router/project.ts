@@ -51,6 +51,78 @@ const multer = require('multer');
  */
 router.get('/all', projectController.getProjects); // 전체 프로젝트 목록 조회
 
+
+/**
+ * @swagger
+ * /project/my:
+ *   get:
+ *     summary: 로그인된 사용자의 프로젝트 목록 조회
+ *     description: 사용자의 고유 ID를 헤더에 포함하여 요청하면 해당 사용자가 생성한 프로젝트 목록을 반환합니다.
+ *     parameters:
+ *       - in: header
+ *         name: user_id
+ *         required: true
+ *         description: 사용자의 고유 ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공적으로 사용자의 프로젝트 목록을 반환
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   project_id:
+ *                     type: string
+ *                     description: 프로젝트의 고유 ID
+ *                   name:
+ *                     type: string
+ *                     description: 프로젝트 이름
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                     description: 프로젝트 생성 날짜
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *                     description: 프로젝트 마지막 수정 날짜
+ *       401:
+ *         description: 헤더에 `user_id`가 없을 때
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "header.user_id 없음"
+ *       404:
+ *         description: 사용자가 생성한 프로젝트가 없을 때
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "DB: 사용자 정보 없음"
+ *       500:
+ *         description: 서버에서 오류가 발생했을 때
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "DB: 처리 오류"
+ */
+
+router.get('/my', projectController.getProjectsByUser); // 로그인된 유저 프로젝트 목록 조회
+
 /**
  * @swagger
  * /project/{id}:
@@ -263,7 +335,6 @@ router.put('/modify', projectController.putProjectModify); // 프로젝트 수�
  *                   type: string
  *                   example: "삭제 중 문제가 발생했습니다."
  */
-
 router.get('/:id', projectController.getProjectDetail); // 게시글 디테일 가져오기
 
 /**
