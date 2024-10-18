@@ -213,3 +213,66 @@ exports.deleteProject = async (req: Request, res: Response) => {
     return res.status(500).json({ error: '삭제 중 문제가 발생했습니다.' });
   }
 };
+exports.supportProject = async (req: Request, res: Response) => {
+  const { project_id } = req.params;
+  const userId = req.headers.authorization;
+  console.log(project_id, req.params, userId, 'dsdsdsdsddsz');
+
+  const fundingAmount = 5000;
+  try {
+    // 1. 프로젝트가 존재하는지 확인
+    const [existingProject] = await db.execute(
+      'SELECT * FROM starfunding.Projects WHERE project_id = ?',
+      [project_id],
+    );
+
+    if (!existingProject.length) {
+      return res.status(404).json({ message: '프로젝트를 찾을 수 없습니다.' });
+    }
+
+    // 2. 트랜잭션 시작
+    await db.query('START TRANSACTION');
+
+    // 3. 프로젝트의 current_amount 업데이트
+    await db.execute(
+      'UPDATE starfunding.Projects SET current_amount = current_amount + ? WHERE project_id = ?',
+      [fundingAmount, project_id],
+    );
+
+    // 4. 유저의 funding 정보 가져오기
+    const [user] = await db.execute(
+      'SELECT funding FROM starfunding.Users WHERE user_id = ?',
+      [userId],
+    );
+
+    if (!user.length) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ message: '유저를 찾을 수 없습니다.' });
+    }
+
+    // 5. 유저의 기존 funding 문자열에 새 프로젝트 ID 추가
+    const currentFunding = user[0].funding || ''; // 기존 펀딩 정보
+    const newFunding = currentFunding
+      ? `${currentFunding},${project_id}`
+      : project_id;
+
+    // 6. 유저의 funding 정보 업데이트
+    await db.execute(
+      'UPDATE starfunding.Users SET funding = ? WHERE user_id = ?',
+      [newFunding, userId],
+    );
+
+    // 7. 트랜잭션 커밋
+    await db.query('COMMIT');
+
+    return res.status(200).json({
+      message: '펀딩이 성공적으로 완료되었습니다.',
+      updatedFunding: newFunding,
+    });
+  } catch (error) {
+    // 에러 발생 시 트랜잭션 롤백
+    await db.query('ROLLBACK');
+    console.error('펀딩 중 오류 발생:', error);
+    return res.status(500).json({ error: '펀딩 중 오류가 발생했습니다.' });
+  }
+};

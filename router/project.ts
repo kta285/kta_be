@@ -401,6 +401,6 @@ router.get('/:id', projectController.getProjectDetail); // 게시글 디테일 �
  *                   example: "프로젝트 상태 업데이트 중 문제가 발생했습니다."
  */
 router.put('/:id/:status', projectController.modifyProjectStatus);
-
+router.post('/support/:project_id', projectController.supportProject); // 펀딩
 router.delete('/:id', projectController.deleteProject); // 프로젝트 삭제
 module.exports = router;
