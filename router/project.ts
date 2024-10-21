@@ -1,11 +1,8 @@
 import express from 'express';
 const router = express.Router();
 const projectController = require('../controllers/projectController');
-const multer = require('multer');
 
 router.get('/all', projectController.getProjects); // 전체 프로젝트 목록 조회
-
-router.get('/my', projectController.getProjectsByUser); // 로그인된 유저 프로젝트 목록 조회
 
 router.get('/:id', projectController.getProjectDetail); // 프로젝트 세부 정보 조회
 
