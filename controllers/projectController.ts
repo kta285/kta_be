@@ -1,8 +1,30 @@
 const db = require('../util/database');
 import type { Request, Response } from 'express';
 
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req:any, file:any, cb:any) => {
+    cb(null, 'uploads/'); // 저장할 폴더
+  },
+  filename: (req:any, file:any, cb:any) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // 고유한 파일명 생성
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// 썸네일 이미지 업로드 처리 라우트
+exports.uploadThumbnail = upload.single('thumbnail');
+
+
 exports.getProjects = async (req: Request, res: Response) => {
-  const sql = `select * from Projects order by project_id`;
+  // const sql = `select * from Projects order by end_date desc`;
+  const sql = `
+  SELECT project_id, created_by, title, goal_amount, current_amount, status, start_date, end_date, type, title_img
+FROM Projects
+ORDER BY end_date DESC;`;
   try {
     const projects = await db.query(sql);
     return res.status(200).json(projects[0]);
