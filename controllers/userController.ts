@@ -26,6 +26,32 @@ exports.getUser = async (req: Request, res: Response) => {
   }
 };
 
+
+exports.getUsersProjects = async (req: Request, res: Response) => {
+  const userId = req.headers['user_id'];
+
+  const query = `SELECT * FROM Projects where created_by = ?`;
+  if (userId) {
+    try {
+      const [results] = await pool.query(query, [userId]);
+      // 사용자 검증
+      if (results.length === 0) {
+        return res
+          .status(404)
+          .json({ message: 'DB: 사용자 id로 조회된 항목 없음' });
+      }
+      // 프로젝트 정보 반환
+      const projects = results;
+      res.status(200).json(projects);
+    } catch (error) {
+      console.log('DB Error:', error); // 디버깅용 에러 출력
+      res.status(500).json({ message: 'DB: 처리 오류' });
+    }
+  } else {
+    res.status(401).json({ message: 'header.user_id 없음' });
+  }
+};
+
 exports.modifyUserInfo = async (req: Request, res: Response) => {
   const { username, currentPassword, password, userId } = req.body;
 

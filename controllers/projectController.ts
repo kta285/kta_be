@@ -1,38 +1,35 @@
 const db = require('../util/database');
 import type { Request, Response } from 'express';
 
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req:any, file:any, cb:any) => {
+    cb(null, 'uploads/'); // 저장할 폴더
+  },
+  filename: (req:any, file:any, cb:any) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // 고유한 파일명 생성
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// 썸네일 이미지 업로드 처리 라우트
+exports.uploadThumbnail = upload.single('thumbnail');
+
+
 exports.getProjects = async (req: Request, res: Response) => {
-  const sql = `select * from Projects order by project_id`;
+  // const sql = `select * from Projects order by end_date desc`;
+  const sql = `
+  SELECT project_id, created_by, title, goal_amount, current_amount, status, start_date, end_date, type, title_img
+FROM Projects
+ORDER BY end_date DESC;`;
   try {
     const projects = await db.query(sql);
     return res.status(200).json(projects[0]);
   } catch (error) {
     return res.status(500).json({ error: '문제가 발생했습니다' });
-  }
-};
-
-exports.getProjectsByUser = async (req: Request, res: Response) => {
-  const userId = req.headers['user_id'];
-
-  const query = `SELECT * FROM Projects where created_by = ?`;
-  if (userId) {
-    try {
-      const [results] = await db.query(query, [userId]);
-      // 사용자 검증
-      if (results.length === 0) {
-        return res
-          .status(404)
-          .json({ message: 'DB: 사용자 id로 조회된 항목 없음' });
-      }
-      // 프로젝트 정보 반환
-      const projects = results;
-      res.status(200).json(projects);
-    } catch (error) {
-      console.log('DB Error:', error); // 디버깅용 에러 출력
-      res.status(500).json({ message: 'DB: 처리 오류' });
-    }
-  } else {
-    res.status(401).json({ message: 'header.user_id 없음' });
   }
 };
 

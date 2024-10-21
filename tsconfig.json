@@ -5,6 +5,7 @@
     "outDir": "./dist", //컴파일 후 js 파일들이 생성되는 곳
     "rootDir": ".", //루트 폴더
     "strict": true, //strict 옵션 활성화
+    "skipLibCheck": true,
     "moduleResolution": "node", //모듈 해석 방법 설정: 'node' (Node.js)
     "esModuleInterop": true,
     "jsx": "react"
