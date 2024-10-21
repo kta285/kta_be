@@ -12,6 +12,6 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./router/*.ts'], // 이 경로가 정확한지 확인 (TypeScript 사용 시는 .ts로)
+  apis: ['./swagger/*.js'], // 이 경로가 정확한지 확인 (TypeScript 사용 시는 .ts로)
 };
 module.exports = swaggerOptions;
