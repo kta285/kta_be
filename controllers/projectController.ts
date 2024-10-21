@@ -12,7 +12,7 @@ exports.getProjects = async (req: Request, res: Response) => {
 };
 
 exports.getProjectsByUser = async (req: Request, res: Response) => {
-  const userId = req.headers["user_id"];
+  const userId = req.headers['user_id'];
 
   const query = `SELECT * FROM Projects where created_by = ?`;
   if (userId) {
@@ -20,21 +20,34 @@ exports.getProjectsByUser = async (req: Request, res: Response) => {
       const [results] = await db.query(query, [userId]);
       // 사용자 검증
       if (results.length === 0) {
-        return res.status(404).json({ error: 'DB: 사용자 정보 없음' });
+        return res
+          .status(404)
+          .json({ message: 'DB: 사용자 id로 조회된 항목 없음' });
       }
-      // 로그인 성공
+      // 프로젝트 정보 반환
       const projects = results;
       res.status(200).json(projects);
     } catch (error) {
-      console.log(userId)
+      console.log('DB Error:', error); // 디버깅용 에러 출력
       res.status(500).json({ message: 'DB: 처리 오류' });
     }
-  } else res.status(401).json({ message: 'header.user_id 없음' });
+  } else {
+    res.status(401).json({ message: 'header.user_id 없음' });
+  }
 };
 
 exports.postProjects = async (req: Request, res: Response) => {
-  let { title, titleImg, amount, category, content, startDate, endDate } =
-    req.body.body;
+  let {
+    title,
+    titleImg,
+    amount,
+    category,
+    content,
+    startDate,
+    endDate,
+    createdId,
+  } = req.body.body;
+
   if (!(startDate instanceof Date && endDate instanceof Date)) {
     startDate = new Date(startDate);
     endDate = new Date(endDate);
@@ -43,7 +56,7 @@ exports.postProjects = async (req: Request, res: Response) => {
     const startDateFomat = startDate.toISOString().split('T')[0];
     const endDateFomat = endDate.toISOString().split('T')[0];
     await db.execute(
-      'INSERT INTO starfunding.Projects (title,title_img, description, goal_amount,start_date,end_date,type,status) VALUES (?,?,?,?,?,?,?,?)',
+      'INSERT INTO starfunding.Projects (title,title_img, description, goal_amount,start_date,end_date,type,status,created_by) VALUES (?,?,?,?,?,?,?,?,?)',
       [
         title,
         titleImg,
@@ -53,6 +66,7 @@ exports.postProjects = async (req: Request, res: Response) => {
         endDateFomat,
         category,
         'pending',
+        createdId,
       ],
     );
     await db.query('COMMIT');
@@ -71,6 +85,7 @@ exports.getProjectDetail = async (req: Request, res: Response) => {
   const sql = `SELECT * FROM Projects WHERE project_id = ?`;
   try {
     const projectsDetail = await db.query(sql, [projectId]);
+
     return res.status(200).json(projectsDetail[0]);
   } catch (error) {
     return res.status(500).json({ error: '문제가 발생했습니다' });
@@ -109,8 +124,22 @@ exports.modifyProjectStatus = async (req: Request, res: Response) => {
 };
 
 exports.putProjectModify = async (req: Request, res: Response) => {
-  let { title, titleImg, amount, category, content, startDate, endDate, id } =
-    req.body.body;
+  const userId = req.headers.authorization;
+  let {
+    title,
+    titleImg,
+    amount,
+    category,
+    content,
+    startDate,
+    endDate,
+    id,
+    created_by,
+  } = req.body.body;
+
+  if (created_by.toString() !== userId) {
+    return res.status(401).json({ error: '수정 권한이 없습니다' });
+  }
 
   if (!(startDate instanceof Date && endDate instanceof Date)) {
     startDate = new Date(startDate);
@@ -153,8 +182,11 @@ exports.putProjectModify = async (req: Request, res: Response) => {
     return res.status(500).json({ error: '수정 중 문제가 발생했습니다' });
   }
 };
+
 exports.deleteProject = async (req: Request, res: Response) => {
   const { id } = req.params;
+  const userId = req.headers.authorization;
+
   try {
     const [existingProject] = await db.execute(
       'SELECT * FROM starfunding.Projects WHERE project_id = ?',
@@ -163,6 +195,9 @@ exports.deleteProject = async (req: Request, res: Response) => {
 
     if (!existingProject.length) {
       return res.status(404).json({ message: '프로젝트를 찾을 수 없습니다.' });
+    }
+    if (existingProject[0].created_by.toString() !== userId) {
+      return res.status(401).json({ error: '삭제 권한이 없습니다' });
     }
 
     await db.execute('DELETE FROM starfunding.Projects WHERE project_id = ?', [
@@ -176,5 +211,68 @@ exports.deleteProject = async (req: Request, res: Response) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: '삭제 중 문제가 발생했습니다.' });
+  }
+};
+exports.supportProject = async (req: Request, res: Response) => {
+  const { project_id } = req.params;
+  const userId = req.headers.authorization;
+  console.log(project_id, req.params, userId, 'dsdsdsdsddsz');
+
+  const fundingAmount = 5000;
+  try {
+    // 1. 프로젝트가 존재하는지 확인
+    const [existingProject] = await db.execute(
+      'SELECT * FROM starfunding.Projects WHERE project_id = ?',
+      [project_id],
+    );
+
+    if (!existingProject.length) {
+      return res.status(404).json({ message: '프로젝트를 찾을 수 없습니다.' });
+    }
+
+    // 2. 트랜잭션 시작
+    await db.query('START TRANSACTION');
+
+    // 3. 프로젝트의 current_amount 업데이트
+    await db.execute(
+      'UPDATE starfunding.Projects SET current_amount = current_amount + ? WHERE project_id = ?',
+      [fundingAmount, project_id],
+    );
+
+    // 4. 유저의 funding 정보 가져오기
+    const [user] = await db.execute(
+      'SELECT funding FROM starfunding.Users WHERE user_id = ?',
+      [userId],
+    );
+
+    if (!user.length) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ message: '유저를 찾을 수 없습니다.' });
+    }
+
+    // 5. 유저의 기존 funding 문자열에 새 프로젝트 ID 추가
+    const currentFunding = user[0].funding || ''; // 기존 펀딩 정보
+    const newFunding = currentFunding
+      ? `${currentFunding},${project_id}`
+      : project_id;
+
+    // 6. 유저의 funding 정보 업데이트
+    await db.execute(
+      'UPDATE starfunding.Users SET funding = ? WHERE user_id = ?',
+      [newFunding, userId],
+    );
+
+    // 7. 트랜잭션 커밋
+    await db.query('COMMIT');
+
+    return res.status(200).json({
+      message: '펀딩이 성공적으로 완료되었습니다.',
+      updatedFunding: newFunding,
+    });
+  } catch (error) {
+    // 에러 발생 시 트랜잭션 롤백
+    await db.query('ROLLBACK');
+    console.error('펀딩 중 오류 발생:', error);
+    return res.status(500).json({ error: '펀딩 중 오류가 발생했습니다.' });
   }
 };
