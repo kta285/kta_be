@@ -1,5 +1,12 @@
 /**
  * @swagger
+ * tags:
+ *   - name: Users
+ *     description: 유저 API
+ */
+
+/**
+ * @swagger
  * /user/signup:
  *   post:
  *     summary: 사용자 회원가입

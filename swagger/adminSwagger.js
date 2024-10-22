@@ -1,5 +1,12 @@
 /**
  * @swagger
+ * tags:
+ *   - name: admin
+ *     description: 사이트 관리용 admin API
+ */
+
+/**
+ * @swagger
  * /admin/project/all:
  *   get:
  *     tags:
@@ -135,4 +142,59 @@
  *         description: 해당 ID의 이미지를 찾을 수 없습니다.
  *       500:
  *         description: 이미지 정보를 수정하는 중 문제가 발생했습니다.
+ */
+
+/**
+ * @swagger
+ * /inquiries/result:
+ *   put:
+ *     summary: 1:1 문의 응답 수정
+ *     tags: [admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - inquiry_id
+ *               - response_content
+ *             properties:
+ *               inquiry_id:
+ *                 type: integer
+ *                 description: 수정할 문의의 ID
+ *               response_content:
+ *                 type: string
+ *                 description: 문의에 대한 응답 내용
+ *     responses:
+ *       200:
+ *         description: 문의가 성공적으로 수정되었습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 문의가 성공적으로 수정되었습니다.
+ *       404:
+ *         description: 해당 ID의 문의를 찾을 수 없습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 해당 ID의 문의를 찾을 수 없습니다.
+ *       500:
+ *         description: 서버 오류가 발생했습니다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: 서버 오류가 발생했습니다.
  */
